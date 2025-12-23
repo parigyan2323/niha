@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>New Year 2026 – IST Countdown</title>
+
+<!-- Force mobile viewport -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+}
+
+#canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#container {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.timer {
+    display: flex;
+    gap: 12px;
+}
+
+.box {
+    background: rgba(255,255,255,0.1);
+    padding: 12px;
+    border-radius: 10px;
+    min-width: 70px;
+}
+
+.box span {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.box small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="container">
+    <h1 id="title">New Year 2026 (IST)</h1>
+    <div class="timer" id="timer">
+        <div class="box"><span id="d">0</span><small>Days</small></div>
+        <div class="box"><span id="h">0</span><small>Hours</small></div>
+        <div class="box"><span id="m">0</span><small>Minutes</small></div>
+        <div class="box"><span id="s">0</span><small>Seconds</small></div>
+    </div>
+</div>
+
+<script>
+/* ================= IST COUNTDOWN ================= */
+function getISTTime() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + 5.5 * 60 * 60 * 1000);
+}
+
+const targetIST = new Date("2026-01-01T00:00:00+05:30").getTime();
+
+function updateTimer() {
+    const nowIST = getISTTime().getTime();
+    const diff = targetIST - nowIST;
+
+    if (diff <= 0) {
+        document.getElementById("title").innerHTML = "🎆 Happy New Year 2026 🇮🇳";
+        document.getElementById("timer").style.display = "none";
+        fireworks = true;
+        return;
+    }
+
+    document.getElementById("d").innerText = Math.floor(diff / 86400000);
+    document.getElementById("h").innerText = Math.floor(diff % 86400000 / 3600000);
+    document.getElementById("m").innerText = Math.floor(diff % 3600000 / 60000);
+    document.getElementById("s").innerText = Math.floor(diff % 60000 / 1000);
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+
+/* ================= FIREWORKS ================= */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+window.onresize = () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+};
+
+let fireworks = true;
+let particles = [];
+
+function createFirework() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height * 0.6;
+    const count = 60;
+
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x, y,
+            vx: Math.cos(i) * Math.random() * 4,
+            vy: Math.sin(i) * Math.random() * 4,
+            life: 100,
+            color: `hsl(${Math.random()*360},100%,60%)`
+        });
+    }
+}
+
+function animate() {
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.02;
+        p.life--;
+
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 2, 2);
+
+        if (p.life <= 0) particles.splice(i, 1);
+    });
+
+    if (fireworks && Math.random() < 0.05) createFirework();
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
